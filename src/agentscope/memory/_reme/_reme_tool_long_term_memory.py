@@ -478,6 +478,7 @@ class ReMeToolLongTermMemory(ReMeLongTermMemoryBase):
     async def retrieve(
         self,
         msg: Msg | list[Msg] | None,
+        limit: int = 5,
         **kwargs: Any,
     ) -> str:
         """Retrieve tool guidelines from memory.
@@ -488,6 +489,8 @@ class ReMeToolLongTermMemory(ReMeLongTermMemoryBase):
             msg (`Msg | list[Msg] | None`):
                 The message containing tool names or queries to
                 retrieve guidelines for.
+            limit (`int`):
+                Maximum number of results to retrieve.
             **kwargs (`Any`):
                 Additional keyword arguments.
 
