@@ -12,6 +12,15 @@ from agentscope.rag import (
 )
 
 
+def _milvus_lite_available() -> bool:
+    """Check if milvus_lite is available."""
+    try:
+        import milvus_lite  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 class RAGStoreTest(IsolatedAsyncioTestCase):
     """Test cases for RAG store implementations."""
 
@@ -75,6 +84,9 @@ class RAGStoreTest(IsolatedAsyncioTestCase):
 
     async def test_milvus_lite_store(self) -> None:
         """Test the MilvusLiteStore implementation."""
+        if not _milvus_lite_available():
+            self.skipTest("milvus_lite is not installed")
+
         store = MilvusLiteStore(
             uri="./milvus_demo.db",
             collection_name="test_milvus",

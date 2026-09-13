@@ -37,6 +37,7 @@ dependencies = [
     "shortuuid",
     "tiktoken",
     "sounddevice",
+    "zai-sdk",
 ]
 
 [project.optional-dependencies]
