@@ -68,10 +68,10 @@ Example:
             )
 
 """
+
 from abc import ABCMeta
 from typing import Any
 
-from .._long_term_memory_base import LongTermMemoryBase
 from ...embedding import (
     DashScopeTextEmbedding,
     OpenAITextEmbedding,
@@ -80,6 +80,7 @@ from ...model import (
     DashScopeChatModel,
     OpenAIChatModel,
 )
+from .._long_term_memory_base import LongTermMemoryBase
 
 
 class ReMeLongTermMemoryBase(LongTermMemoryBase, metaclass=ABCMeta):
@@ -267,7 +268,8 @@ class ReMeLongTermMemoryBase(LongTermMemoryBase, metaclass=ABCMeta):
 
         embedding_dimensions = embedding_model.dimensions
         config_args.append(
-            f"embedding_model.default.params={{\"dimensions\": {embedding_dimensions}}}"
+            f"embedding_model.default.params="
+            f'{{"dimensions": {embedding_dimensions}}}',
         )
 
         # Attempt to import and initialize ReMe
