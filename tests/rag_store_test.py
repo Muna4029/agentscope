@@ -3,6 +3,8 @@
 import os
 from unittest import IsolatedAsyncioTestCase
 
+import pytest
+
 from agentscope.message import TextBlock
 from agentscope.rag import (
     QdrantStore,
@@ -75,6 +77,12 @@ class RAGStoreTest(IsolatedAsyncioTestCase):
 
     async def test_milvus_lite_store(self) -> None:
         """Test the MilvusLiteStore implementation."""
+        # Check if milvus_lite is available
+        try:
+            import milvus_lite  # noqa: F401
+        except ImportError:
+            pytest.skip("milvus_lite is not installed, skipping test")
+
         store = MilvusLiteStore(
             uri="./milvus_demo.db",
             collection_name="test_milvus",

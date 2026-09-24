@@ -53,7 +53,7 @@ full = [
     "mem0ai",
     "packaging",
     # RAG
-    "pypdf",
+    "pypdf>=3.15.0",
     "nltk",
     "qdrant-client",
 ]
