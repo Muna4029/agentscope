@@ -24,6 +24,7 @@ jobs:
     - name: Install Dev Dependencies
       run: |
         pip install -q -e .[dev]
+        pip install "mcp>=1.13,<2"
         pip install coverage pytest
     - name: Run tests with coverage
       run: |
