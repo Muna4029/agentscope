@@ -13,21 +13,22 @@ jobs:
     env:
       OS: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@master
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Update setuptools
-      run: |
-        pip install setuptools==78.1.1 wheel==0.45.1
-    - name: Install Dev Dependencies
-      run: |
-        pip install -q -e .[dev]
-        pip install coverage pytest
-    - name: Run tests with coverage
-      run: |
-        coverage run -m pytest tests
-    - name: Generate coverage report
-      run: |-
-        coverage report -m
+      - uses: actions/checkout@master
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Update setuptools
+        run: |
+          pip install setuptools==78.1.1 wheel==0.45.1
+      - name: Install Dev Dependencies
+        run: |
+          pip install -q -e .[dev]
+          pip install "mcp>=1.13,<2"
+          pip install coverage pytest
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest tests
+      - name: Generate coverage report
+        run: |-
+          coverage report -m
