@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 """The Milvus Lite vector store implementation."""
-import json
-from typing import Any, Literal, TYPE_CHECKING
 
-from .._reader import Document
-from ._store_base import VDBStoreBase
-from .._document import DocMetadata
+import json
+from typing import TYPE_CHECKING, Any, Literal
+
+from milvus_lite import MilvusClient
 
 from ..._utils._common import _map_text_to_uuid
 from ...types import Embedding
+from .._document import DocMetadata
+from .._reader import Document
+from ._store_base import VDBStoreBase
 
 if TYPE_CHECKING:
     from pymilvus import MilvusClient
@@ -60,6 +62,7 @@ class MilvusLiteStore(VDBStoreBase):
         """
 
         try:
+            from milvus_lite import MilvusClient
             from pymilvus import MilvusClient
         except ImportError as e:
             raise ImportError(
@@ -189,10 +192,7 @@ class MilvusLiteStore(VDBStoreBase):
         for hits in results:
             for hit in hits:
                 # Check score threshold
-                if (
-                    score_threshold is not None
-                    and hit["distance"] < score_threshold
-                ):
+                if score_threshold is not None and hit["distance"] < score_threshold:
                     continue
 
                 # Get metadata from entity
