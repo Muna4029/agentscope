@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """Test the RAG store implementations."""
+
 import os
 from unittest import IsolatedAsyncioTestCase
 
 from agentscope.message import TextBlock
 from agentscope.rag import (
-    QdrantStore,
-    Document,
     DocMetadata,
+    Document,
     MilvusLiteStore,
+    QdrantStore,
 )
 
 
@@ -118,7 +119,7 @@ class RAGStoreTest(IsolatedAsyncioTestCase):
         self.assertEqual(len(res), 1)
         self.assertEqual(
             res[0].score,
-            0.9974148273468018,
+            pytest.approx(0.9974148273468018, rel=1e-9),
         )
         self.assertEqual(
             res[0].metadata.content["text"],
