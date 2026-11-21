@@ -9,6 +9,11 @@ from pydantic import BaseModel
 from agentscope.message import TextBlock, ToolUseBlock
 from agentscope.model import ZhipuChatModel, ChatResponse
 
+try:
+    import zai
+except ImportError:
+    raise ImportError("The 'zai' module is required but not installed.")
+
 
 class SampleModel(BaseModel):
     """Sample Pydantic model for testing structured output."""
@@ -249,12 +254,13 @@ class TestZhipuChatModel(IsolatedAsyncioTestCase):
 
     async def test_tool_call_response_processing(self) -> None:
         """Test processing of tool call response."""
-        with patch("zai.ZhipuAiClient") as mock_client_class:
-            mock_client = Mock()
-            mock_client_class.return_value = mock_client
+        try:
+            with patch("zai.ZhipuAiClient") as mock_client_class:
+                mock_client = Mock()
+                mock_client_class.return_value = mock_client
 
-            model = ZhipuChatModel(
-                model_name="glm-4",
+                model = ZhipuChatModel(
+                    model_name="glm-4",
                 api_key="test_key",
                 stream=False,
             )
@@ -292,12 +298,13 @@ class TestZhipuChatModel(IsolatedAsyncioTestCase):
 
     async def test_structured_output_response_processing(self) -> None:
         """Test processing of structured output response."""
-        with patch("zai.ZhipuAiClient") as mock_client_class:
-            mock_client = Mock()
-            mock_client_class.return_value = mock_client
+        try:
+            with patch("zai.ZhipuAiClient") as mock_client_class:
+                mock_client = Mock()
+                mock_client_class.return_value = mock_client
 
-            model = ZhipuChatModel(
-                model_name="glm-4",
+                model = ZhipuChatModel(
+                    model_name="glm-4",
                 api_key="test_key",
                 stream=False,
             )
