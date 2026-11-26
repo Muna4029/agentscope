@@ -85,9 +85,9 @@ from ...model import (
 class ReMeLongTermMemoryBase(LongTermMemoryBase, metaclass=ABCMeta):
     """Base class for ReMe-based long-term memory implementations.
 
-    This class provides the foundation for integrating AgentScope with the ReMe
-    library, enabling agents to maintain and retrieve long-term memories across
-    different contexts.
+    This class provides the foundation for integrating AgentScope with the
+    ReMe library, enabling agents to maintain and retrieve long-term memories
+    across different contexts.
 
     The ReMe library must be installed separately:
         pip install reme-ai
@@ -96,10 +96,8 @@ class ReMeLongTermMemoryBase(LongTermMemoryBase, metaclass=ABCMeta):
         Python 3.12 or greater is required to use ReMe.
 
     If the library is not installed, a warning will be issued during
-    initialization,
-    and runtime errors with installation instructions will be raised
-    when attempting
-    to use memory operations.
+    initialization, and runtime errors with installation instructions will be
+    raised when attempting to use memory operations.
     """
 
     def __init__(
@@ -277,12 +275,12 @@ class ReMeLongTermMemoryBase(LongTermMemoryBase, metaclass=ABCMeta):
         try:
             from reme_ai import ReMeApp
         except ImportError as e:
-            raise ImportError(
+            msg = (
                 "The 'reme_ai' library is required for ReMe-based "
-                "long-term memory. Please install it by `pip install reme-ai`,"
-                "and visit: https://github.com/modelscope/reMe for more "
-                "information.",
-            ) from e
+                "long-term memory. Please install it by `pip install reme-ai`. "
+                "For more information, visit: https://github.com/modelscope/reMe"
+            )
+            raise ImportError(msg) from e
 
         # Initialize ReMe with extracted configurations
         self.app = ReMeApp(
