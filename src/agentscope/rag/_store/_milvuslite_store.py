@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """The Milvus Lite vector store implementation."""
+
 import json
 from typing import Any, Literal, TYPE_CHECKING
 
@@ -109,7 +110,9 @@ class MilvusLiteStore(VDBStoreBase):
         # Prepare data for insertion using the new MilvusClient API
         data = []
         for doc in documents:
-            # Generate a unique integer ID based on hash
+            # Generate a stable unique ID based on the document contents.
+            # Use deterministic UUID5 for reproducible IDs across runs instead
+            # of Python's built-in hash() which is randomized per process.
             unique_string = json.dumps(
                 {
                     "doc_id": doc.metadata.doc_id,
@@ -121,9 +124,11 @@ class MilvusLiteStore(VDBStoreBase):
 
             id_type = self.collection_kwargs.get("id_type", "int")
             if id_type == "string":
-                unique_id = _map_text_to_uuid(unique_string)[:6]
+                # Keep the full mapped UUID (do not truncate) to avoid collisions
+                unique_id = _map_text_to_uuid(unique_string)
             else:
-                unique_id = abs(hash(unique_string)) % (10**10)
+                # Deterministic integer derived from UUID5 for stability
+                unique_id = uuid.uuid5(uuid.NAMESPACE_DNS, unique_string).int % (10**10)
 
             # Prepare data entry with vector and metadata
             entry = {
@@ -188,15 +193,30 @@ class MilvusLiteStore(VDBStoreBase):
         collected_res = []
         for hits in results:
             for hit in hits:
-                # Check score threshold
-                if (
-                    score_threshold is not None
-                    and hit["distance"] < score_threshold
-                ):
+                # Extract score/distance with fallback to common keys to be robust
+                raw_score = None
+                if isinstance(hit, dict):
+                    raw_score = hit.get("score", hit.get("distance", None))
+                else:
+                    # If hit is an object-like, try attribute access safely
+                    raw_score = getattr(hit, "score", None) or getattr(
+                        hit, "distance", None
+                    )
+
+                # Normalize to float and apply threshold
+                try:
+                    score_value = float(raw_score) if raw_score is not None else 0.0
+                except Exception:
+                    score_value = 0.0
+
+                if score_threshold is not None and score_value < score_threshold:
                     continue
 
                 # Get metadata from entity
-                entity = hit["entity"]
+                if isinstance(hit, dict):
+                    entity = hit.get("entity", {})
+                else:
+                    entity = getattr(hit, "entity", {})
 
                 doc_metadata = DocMetadata(
                     content=entity.get("content", ""),
@@ -209,7 +229,7 @@ class MilvusLiteStore(VDBStoreBase):
                 collected_res.append(
                     Document(
                         embedding=None,  # Vector not returned by default
-                        score=hit["distance"],
+                        score=score_value,
                         metadata=doc_metadata,
                     ),
                 )
@@ -234,7 +254,7 @@ class MilvusLiteStore(VDBStoreBase):
         """
         if ids is None and filter is None:
             raise ValueError(
-                "Either ids or filter_expr must be provided for deletion.",
+                "Either ids or filter must be provided for deletion.",
             )
 
         # Delete data using MilvusClient
