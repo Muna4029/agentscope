@@ -5,9 +5,9 @@ This module provides a long-term memory implementation that integrates
 with the mem0 library to provide persistent memory storage and retrieval
 capabilities for AgentScope agents.
 """
-import json
-from typing import Any, TYPE_CHECKING
+
 from importlib import metadata
+from typing import Any, TYPE_CHECKING
 
 
 from pydantic import field_validator
@@ -152,14 +152,14 @@ class Mem0LongTermMemory(LongTermMemoryBase):
 
             # Register the agentscope providers with mem0
 
-            EmbedderFactory.provider_to_class[
-                "agentscope"
-            ] = "agentscope.memory._mem0_utils.AgentScopeEmbedding"
+            EmbedderFactory.provider_to_class["agentscope"] = (
+                "agentscope.memory._mem0_utils.AgentScopeEmbedding"
+            )
             if is_mem0_version_low:
                 # For mem0 version <= 0.1.115, use the old style
-                LlmFactory.provider_to_class[
-                    "agentscope"
-                ] = "agentscope.memory._mem0_utils.AgentScopeLLM"
+                LlmFactory.provider_to_class["agentscope"] = (
+                    "agentscope.memory._mem0_utils.AgentScopeLLM"
+                )
             else:
                 # For mem0 version > 0.1.115, use the new style
                 LlmFactory.provider_to_class["agentscope"] = (
@@ -177,8 +177,7 @@ class Mem0LongTermMemory(LongTermMemoryBase):
 
         if agent_name is None and user_name is None and run_name is None:
             raise ValueError(
-                "at least one of agent_name, user_name, and run_name is "
-                "required",
+                "at least one of agent_name, user_name, and run_name is required",
             )
 
         # Store agent and user identifiers for memory management
@@ -242,10 +241,8 @@ class Mem0LongTermMemory(LongTermMemoryBase):
                 # persistence set on_disk to True to enable persistence,
                 # otherwise it will be in memory only
                 on_disk = kwargs.get("on_disk", True)
-                mem0_config.vector_store = (
-                    mem0.vector_stores.configs.VectorStoreConfig(
-                        config={"on_disk": on_disk},
-                    )
+                mem0_config.vector_store = mem0.vector_stores.configs.VectorStoreConfig(
+                    config={"on_disk": on_disk},
                 )
 
         # Initialize the async memory instance with the configured settings
@@ -365,8 +362,7 @@ class Mem0LongTermMemory(LongTermMemoryBase):
                 content=[
                     TextBlock(
                         type="text",
-                        text=f"Successfully recorded content to memory "
-                        f"{results}",
+                        text=f"Successfully recorded content to memory {results}",
                     ),
                 ],
             )
@@ -514,9 +510,7 @@ class Mem0LongTermMemory(LongTermMemoryBase):
             user_id=self.user_id,
             run_id=self.run_id,
             memory_type=(
-                memory_type
-                if memory_type is not None
-                else self.default_memory_type
+                memory_type if memory_type is not None else self.default_memory_type
             ),
             infer=infer,
             **kwargs,
@@ -548,16 +542,12 @@ class Mem0LongTermMemory(LongTermMemoryBase):
         if isinstance(msg, Msg):
             msg = [msg]
 
-        if not isinstance(msg, list) or not all(
-            isinstance(_, Msg) for _ in msg
-        ):
+        if not isinstance(msg, list) or not all(isinstance(_, Msg) for _ in msg):
             raise TypeError(
                 "The input message must be a Msg or a list of Msg objects.",
             )
 
-        msg_strs = [
-            json.dumps(_.to_dict()["content"], ensure_ascii=False) for _ in msg
-        ]
+        msg_strs = [json.dumps(_.to_dict()["content"], ensure_ascii=False) for _ in msg]
 
         results = []
         for item in msg_strs:
