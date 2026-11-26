@@ -362,7 +362,7 @@ class ReMeTaskLongTermMemory(ReMeLongTermMemoryBase):
         msg: Msg | list[Msg] | None,
         limit: int = 3,
         **kwargs: Any,
-    ) -> str:
+    ) -> ToolResponse:
         """Retrieve relevant task experiences from memory.
 
         Args:
@@ -379,11 +379,11 @@ class ReMeTaskLongTermMemory(ReMeLongTermMemoryBase):
                 Additional keyword arguments.
 
         Returns:
-            `str`:
-                The retrieved task experiences as a string.
+            `ToolResponse`:
+                The retrieved task experiences as a ToolResponse object.
         """
         if msg is None:
-            return ""
+            return {"answer": ""}
 
         if isinstance(msg, Msg):
             msg = [msg]
@@ -419,7 +419,7 @@ class ReMeTaskLongTermMemory(ReMeLongTermMemoryBase):
                 query = "\n".join(content_parts)
 
             if not query:
-                return ""
+                return {"answer": ""}
 
             # Retrieve using the query from the last message
             result = await self.app.async_execute(
@@ -430,11 +430,11 @@ class ReMeTaskLongTermMemory(ReMeLongTermMemoryBase):
                 **kwargs,
             )
 
-            return result.get("answer", "")
+            return result
 
         except Exception as e:
             logger.exception("Error retrieving task memory: %s", str(e))
             import warnings
 
             warnings.warn(f"Error retrieving task memory: {str(e)}")
-            return ""
+            return {"answer": ""}
