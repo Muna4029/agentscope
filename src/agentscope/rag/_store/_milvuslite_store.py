@@ -57,24 +57,26 @@ class MilvusLiteStore(VDBStoreBase):
                 Other keyword arguments for the Milvus client.
             collection_kwargs (`dict[str, Any] | None`, optional):
                 Other keyword arguments for creating the collection.
+
+        Note:
+            The actual pymilvus client is created lazily to avoid import-time
+            errors when the optional milvus-lite dependency is not installed
+            or when URI validation would otherwise fail during object
+            construction. Use get_client() to obtain or create the client.
         """
 
-        try:
-            from pymilvus import MilvusClient
-        except ImportError as e:
-            raise ImportError(
-                "Milvus client is not installed. Please install it with "
-                "`pip install pymilvus[milvus_lite]`.",
-            ) from e
-
+        # Do not import or construct the pymilvus client at initialization to
+        # avoid raising ImportError/ConnectionConfigException during object
+        # creation. Store the parameters needed to construct the client later.
         client_kwargs = client_kwargs or {}
 
-        # Initialize MilvusClient with uri and optional token
-        init_params = {"uri": uri, **client_kwargs}
+        # Store client init parameters for lazy construction
+        self._client_init_params = {"uri": uri, **client_kwargs}
         if token:
-            init_params["token"] = token
+            self._client_init_params["token"] = token
 
-        self._client = MilvusClient(**init_params)
+        # The actual client will be created lazily by get_client()
+        self._client = None
 
         self.collection_name = collection_name
         self.dimensions = dimensions
